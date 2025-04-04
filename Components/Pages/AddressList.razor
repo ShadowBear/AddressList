@@ -1,0 +1,152 @@
+﻿@page "/addressList"
+@using global::AddressList.Services
+@using global::AddressList.Models
+
+@inject IAddressService AddressService
+@rendermode InteractiveServer
+
+@if(Addresses == null){
+    <p>Loading ...</p>
+}
+else if (Addresses.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Address Status</th>
+                <th>Rechtsform</th>
+                <th>Aktenzeichen</th>
+                <th>Anrede</th>
+                <th>Titel</th>
+                <th>Vorname</th>
+                <th>Nachname</th>
+                <th>Straße</th>
+                <th>Hausnummer</th>
+                <th>PLZ</th>
+                <th>Ort</th>
+                <th>Land</th>
+                <th>Import</th>
+                <th>Datenquelle</th>
+                <th>Aktuelle Anschrift</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var address in Addresses)
+            {
+                <tr style="color: @(address.AktuelleAnschrift ? "blue" : "black")">
+                    <td>
+                        @if(address.AddressStatus == "1"){
+                            <img src="icons/Orange.ico" alt="unbestätigt" width="20" height="20" />
+                        }
+                        else if (address.AddressStatus == "2")
+                        {
+                            <img src="icons/Green.ico" alt="bestätigt" width="20" height="20" />
+                        }
+                        else if(address.AddressStatus == "90") {
+                            <img src="icons/Red.ico" alt="Postretoure" width="20" height="20" />
+                        }                        
+                        else{
+                            @address.AddressStatus
+                        }
+                    </td>
+                    <td>@address.Rechtsform</td>
+                    <td>@address.Aktenzeichen</td>
+                    <td>@address.Anrede</td>
+                    <td>@address.Titel</td>
+                    <td>@address.Vorname</td>
+                    <td>@address.Nachname</td>
+                    <td>@address.Straße</td>
+                    <td>@address.Hausnummer</td>
+                    <td>@address.PLZ</td>
+                    <td>@address.Ort</td>
+                    <td>@address.Land</td>
+                    <td>@address.Import</td>
+                    <td>@address.Datenquelle</td>
+                    <td>@address.AktuelleAnschrift</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No addresses found.</p>
+}
+
+@if(ContactInfos == null){
+    <p>Loading ...</p>
+}else if(ContactInfos.Any()){
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Kommunikationsadresse</th>
+                <th>Gehört</th>
+                <th>Anmerkung</th>
+                <th>Import Datum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in ContactInfos)
+            {
+                <tr>
+                    <td>
+                        @if (contact.Status == "1")
+                        {
+                            <img src="icons/Orange.ico" alt="unbestätigt" width="20" height="20" />
+                        }
+                        else if (contact.Status == "2")
+                        {
+                            <img src="icons/Green.ico" alt="bestätigt" width="20" height="20" />
+                        }
+                        else if (contact.Status == "99")
+                        {
+                            <img src="icons/Red.ico" alt="Postretoure" width="20" height="20" />
+                        }
+                        else
+                        {
+                            @contact.Status
+                        }
+                    </td>
+                    <td>
+                        @if(contact.Typ == "1"){
+                            <img src="icons/Telephone.ico" alt="Telefon" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "2")
+                        {
+                            <img src="icons/Fax.ico" alt="Fax" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "3")
+                        {
+                            <img src="icons/MobilePhone.ico" alt="Mobil" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "4")
+                        {
+                            <img src="icons/EMail.ico" alt="E-Mail" width="20" height="20" />
+                        }
+                        else if(contact.Typ == "6"){
+                            <img src="icons/Internet.ico" alt="Web" width="20" height="20" />
+                        }else{
+                            @contact.Typ
+                        }
+                    </td>
+                    <td>@contact.Kommunikationsadresse</td>
+                    <td>@contact.Gehoert</td>
+                    <td>@contact.Anmerkung</td>
+                    <td>@contact.ImportDatum</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}else{
+    <p>No Contact Infos found.</p>
+}
+
+@code {
+    [Parameter]
+    public List<Address> Addresses { get; set; }    
+
+    [Parameter]
+    public List<ContactInfo> ContactInfos { get; set; }
+}

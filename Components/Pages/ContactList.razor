@@ -1,0 +1,17 @@
+﻿@using global::AddressList.Models
+@page "/contactList"
+@rendermode InteractiveServer
+<h3>ContactList</h3>
+
+<ul>
+	@foreach (var contact in ContactInfos)
+	{
+		<li>
+			@contact.Gehoert
+		</li>
+	}
+</ul>
+
+@code {
+	[Parameter] public List<ContactInfo> ContactInfos { get; set; }
+}

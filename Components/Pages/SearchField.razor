@@ -1,0 +1,182 @@
+﻿@using global::AddressList.Models
+@using global::AddressList.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject IAddressService AddressService
+@inject IContactInfoService ContactInfoService
+
+@page "/searchField"
+@rendermode InteractiveServer
+
+<h3>SearchField</h3>
+<input @bind="searchInput" />
+<button class="btn btn-primary" @onclick="SearchResults">Suchen</button>
+
+<AddressList Addresses="addresses" ContactInfos="contactInfos" />
+
+<InputFile class="btn" OnChange="HandleFileSelection" />
+<input type="radio" checked="@(isAddressCSV == true)"
+name="CSV" @onchange="@(() => isAddressCSV = true)" />
+<label>AddressCSV</label>
+<input type="radio" checked="@(isAddressCSV == false)"
+name="CSV" @onchange="@(() => isAddressCSV = false)" />
+<label>ContactInfoCSV</label>
+<button class="btn btn-secondary" @onclick="UploadCSV">Upload CSV Data</button>
+<button class="btn btn-danger" @onclick="ClearAddressData">Clear Address</button>
+
+@code {
+	private string searchInput = "";
+	private List<Address> addresses = new List<Address>();
+	private List<Address> allAddreses = new List<Address>();
+
+	private List<ContactInfo> contactInfos = new List<ContactInfo>();
+	private List<ContactInfo> allContactInfos = new List<ContactInfo>();
+
+	private bool isAddressCSV = true;
+
+	private IBrowserFile selectedFile;	
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		allAddreses = await AddressService.GetAddressesAsync();
+		allContactInfos = await ContactInfoService.GetContactInfosAsync();
+	}
+
+
+	void SearchResults(){
+		int fileId = 0;
+		if (string.IsNullOrEmpty(searchInput)) return;
+		List<Address> searchResults = allAddreses.FindAll(item => item.Aktenzeichen == searchInput);
+		if(searchResults.Count > 0){
+			fileId = searchResults.ElementAt(0).FileID;
+		}
+		searchResults = OrderList(searchResults);
+		addresses = searchResults;
+
+		List<ContactInfo> searchResultContacts = allContactInfos.FindAll(item => item.FileID == fileId);
+		contactInfos = searchResultContacts;
+
+		Console.WriteLine("Searched");
+	}
+
+	List<Address> OrderList(List<Address> list){
+		return list.OrderByDescending(item => item.AktuelleAnschrift).ToList();
+	}
+
+	void HandleFileSelection(InputFileChangeEventArgs e){
+		selectedFile = e.File;
+	}
+
+	async Task ClearAddressData(){
+		var response = await Http.PostAsync("https://localhost:7018/api/address/clear", null);
+		Console.WriteLine(response.IsSuccessStatusCode ? "Data cleared" : "Failed to clear the Address data");
+	}
+
+	async Task UploadCSV(){
+		if (selectedFile != null)
+		{
+			// Read the file content into a string
+			var stream = selectedFile.OpenReadStream();
+			using (var reader = new StreamReader(stream))
+			{
+				var csvContent = await reader.ReadToEndAsync();
+				HttpResponseMessage response;
+
+				if(isAddressCSV){
+					var parsedAddresses = ParseAddressCsv(csvContent);
+					response = await Http.PostAsJsonAsync("https://localhost:7018/api/address/import", parsedAddresses);
+
+				}else{
+					var parsedContacts = ParseContactInfoCsv(csvContent);
+					response = await Http.PostAsJsonAsync("https://localhost:7018/api/contactinfo/import", parsedContacts);
+				}
+
+				if (response.IsSuccessStatusCode)
+				{
+					Console.WriteLine("File uploaded successfully.");
+				}
+				else
+				{
+					Console.WriteLine("Error uploading file.");
+				}
+
+			}
+		}
+	}
+
+	// Simple CSV parsing logic (assuming CSV format is simple)
+	private List<Address> ParseAddressCsv(string csvContent)
+	{
+		var addresses = new List<Address>();
+		var lines = csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+		foreach (var line in lines.Skip(1))
+		{
+			var fields = line.Split(';');
+
+			int fileID;
+			var validFileID = Int32.TryParse(fields[0], out fileID);
+
+			bool currentAddress;
+			var validAddress = Boolean.TryParse(fields[14], out currentAddress);
+
+			if (!validAddress || !validFileID) continue;
+
+			var address = new Address
+				{
+					Id = 0,
+					FileID = fileID,
+					Aktenzeichen = fields[1],
+					Rechtsform = fields[2],
+					Anrede = fields[3],
+					Titel = fields[4],
+					Vorname = fields[5],
+					Nachname = fields[6],
+					Straße = fields[7],
+					Hausnummer = fields[8],
+					PLZ = fields[9],
+					Ort = fields[10],
+					Land = fields[11],
+					Import = fields[12],
+					Datenquelle = fields[13],
+					AktuelleAnschrift = currentAddress,
+					AddressStatus = fields[15]
+				};
+
+			addresses.Add(address);
+		}
+		return addresses;
+	}
+
+	private List<ContactInfo> ParseContactInfoCsv(string csvContent)
+	{
+		var contactInfos = new List<ContactInfo>();
+		var lines = csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+		foreach (var line in lines.Skip(1))
+		{
+			var fields = line.Split(';');
+
+			int fileID;
+			var validFileID = Int32.TryParse(fields[0], out fileID);
+
+			if (!validFileID) continue;
+
+			var contactInfo = new ContactInfo
+				{
+					FileID = fileID,
+					Status = fields[1],
+					Typ = fields[2],
+					Kommunikationsadresse = fields[3],
+					Gehoert = fields[4],
+					Anmerkung = fields[5],
+					ImportDatum = fields[6]
+				};
+
+			contactInfos.Add(contactInfo);
+		}
+		return contactInfos;
+	}
+}

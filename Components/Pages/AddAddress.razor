@@ -1,0 +1,124 @@
+﻿@using global::AddressList.Models
+@using global::AddressList.Services
+
+
+@page "/addAddress"
+@rendermode InteractiveServer
+@inject IAddressService AddressService
+
+<EditForm Model="@address" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Aktenzeichen">Aktenzeichen</label>
+        <InputText id="Aktenzeichen" class="form-control" @bind-Value="address.Aktenzeichen" />
+    </div>
+    <div class="form-group">
+        <label for="Rechtsform">Rechtsform</label>
+        <InputText id="Rechtsform" class="form-control" @bind-Value="address.Rechtsform" />
+    </div>
+    <div class="form-group">
+        <label for="Anrede">Anrede</label>
+        <InputText id="Anrede" class="form-control" @bind-Value="address.Anrede" />
+    </div>
+    <div class="form-group">
+        <label for="Titel">Titel</label>
+        <InputText id="Titel" class="form-control" @bind-Value="address.Titel" />
+    </div>
+    <div class="form-group">
+        <label for="Vorname">Vorname</label>
+        <InputText id="Vorname" class="form-control" @bind-Value="address.Vorname" />
+    </div>
+    <div class="form-group">
+        <label for="Nachname">Nachname</label>
+        <InputText id="Nachname" class="form-control" @bind-Value="address.Nachname" />
+    </div>
+    <div class="form-group">
+        <label for="Straße">Straße</label>
+        <InputText id="Straße" class="form-control" @bind-Value="address.Straße" />
+    </div>
+    <div class="form-group">
+        <label for="Hausnummer">Hausnummer</label>
+        <InputText id="Hausnummer" class="form-control" @bind-Value="address.Hausnummer" />
+    </div>
+    <div class="form-group">
+        <label for="PLZ">PLZ</label>
+        <InputText id="PLZ" class="form-control" @bind-Value="address.PLZ" />
+    </div>
+    <div class="form-group">
+        <label for="Ort">Ort</label>
+        <InputText id="Ort" class="form-control" @bind-Value="address.Ort" />
+    </div>
+    <div class="form-group">
+        <label for="Land">Land</label>
+        <InputText id="Land" class="form-control" @bind-Value="address.Land" />
+    </div>
+    <div class="form-group">
+        <label for="Import">Import</label>
+        <InputText id="Import" class="form-control" @bind-Value="address.Import" />
+    </div>
+    <div class="form-group">
+        <label for="Datenquelle">Datenquelle</label>
+        <InputText id="Datenquelle" class="form-control" @bind-Value="address.Datenquelle" />
+    </div>    
+    <div class="form-group">
+        <label for="AddressStatus">Address Status</label>
+        <InputText id="AddressStatus" class="form-control" @bind-Value="address.AddressStatus" />
+    </div>
+    <div class="form-group">
+        <label for="AktuelleAnschrift">Aktuelle Anschrift?</label>
+        <InputCheckbox id="AktuelleAnschrift" class="form-check-input" @bind-Value="address.AktuelleAnschrift" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save Address</button>
+</EditForm>
+
+@if (successMessage != null)
+{
+    <div class="alert alert-success mt-3">
+        @successMessage
+    </div>
+}
+
+@code {
+    private Address address = new Address();
+    private string successMessage;
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            // Add the new address to the database
+            await AddressService.SaveAddress(address);
+            LogAddress(address);
+
+            successMessage = "Address has been successfully added.";
+
+            // Reset the form
+            address = new Address();
+        }
+        catch (Exception ex)
+        {
+            successMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void LogAddress(Address address)
+    {
+        Console.WriteLine("Address Created:");
+        Console.WriteLine($"Aktenzeichen: {address.Aktenzeichen}");
+        Console.WriteLine($"Anrede: {address.Anrede}");
+        Console.WriteLine($"Titel: {address.Titel}");
+        Console.WriteLine($"Vorname: {address.Vorname}");
+        Console.WriteLine($"Nachname: {address.Nachname}");
+        Console.WriteLine($"Straße: {address.Straße}");
+        Console.WriteLine($"Hausnummer: {address.Hausnummer}");
+        Console.WriteLine($"PLZ: {address.PLZ}");
+        Console.WriteLine($"Ort: {address.Ort}");
+        Console.WriteLine($"Land: {address.Land}");
+        Console.WriteLine($"Import: {address.Import}");
+        Console.WriteLine($"Datenquelle: {address.Datenquelle}");
+        Console.WriteLine($"Aktuelle Anschrift: {address.AktuelleAnschrift}");
+        Console.WriteLine($"Address Status: {address.AddressStatus}");
+    }
+}
