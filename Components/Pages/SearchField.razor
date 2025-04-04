@@ -6,24 +6,25 @@
 @inject IAddressService AddressService
 @inject IContactInfoService ContactInfoService
 
-@page "/searchField"
+@page "/"
 @rendermode InteractiveServer
 
-<h3>SearchField</h3>
+<h2 class="margin-top">Aktenzeichen:</h2>
 <input @bind="searchInput" />
-<button class="btn btn-primary" @onclick="SearchResults">Suchen</button>
+<button class="btn btn-primary margin-bttm" @onclick="SearchResults">Suchen</button>
 
-<AddressList Addresses="addresses" ContactInfos="contactInfos" />
 
-<InputFile class="btn" OnChange="HandleFileSelection" />
+<AddressList Addresses="addresses" />
+<ContactList ContactInfos="contactInfos" />
+<InputFile class="btn" OnChange="HandleFileSelection" id="fileInput" />
 <input type="radio" checked="@(isAddressCSV == true)"
 name="CSV" @onchange="@(() => isAddressCSV = true)" />
 <label>AddressCSV</label>
 <input type="radio" checked="@(isAddressCSV == false)"
 name="CSV" @onchange="@(() => isAddressCSV = false)" />
 <label>ContactInfoCSV</label>
-<button class="btn btn-secondary" @onclick="UploadCSV">Upload CSV Data</button>
-<button class="btn btn-danger" @onclick="ClearAddressData">Clear Address</button>
+<button class="btn btn-secondary" @onclick="UploadCSV">Upload CSV Daten</button>
+<button class="btn btn-danger" @onclick="ClearAddressData">Adressen löschen</button>
 
 @code {
 	private string searchInput = "";

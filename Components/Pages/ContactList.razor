@@ -1,17 +1,90 @@
 ﻿@using global::AddressList.Models
 @page "/contactList"
 @rendermode InteractiveServer
-<h3>ContactList</h3>
 
-<ul>
-	@foreach (var contact in ContactInfos)
-	{
-		<li>
-			@contact.Gehoert
-		</li>
-	}
-</ul>
+<h5>Kontakt Liste:</h5>
+
+@if (ContactInfos == null)
+{
+    <p>Laden ...</p>
+}
+else if (ContactInfos.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Kommunikationsadresse</th>
+                <th>Gehört</th>
+                <th>Anmerkung</th>
+                <th>Import Datum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in ContactInfos)
+            {
+                <tr>
+                    <td>
+                        @if (contact.Status == "1")
+                        {
+                            <img src="icons/Orange.ico" alt="unbestätigt" width="20" height="20" />
+                        }
+                        else if (contact.Status == "2")
+                        {
+                            <img src="icons/Green.ico" alt="bestätigt" width="20" height="20" />
+                        }
+                        else if (contact.Status == "99")
+                        {
+                            <img src="icons/Red.ico" alt="Postretoure" width="20" height="20" />
+                        }
+                        else
+                        {
+                            @contact.Status
+                        }
+                    </td>
+                    <td>
+                        @if (contact.Typ == "1")
+                        {
+                            <img src="icons/Telephone.ico" alt="Telefon" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "2")
+                        {
+                            <img src="icons/Fax.ico" alt="Fax" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "3")
+                        {
+                            <img src="icons/MobilePhone.ico" alt="Mobil" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "4")
+                        {
+                            <img src="icons/EMail.ico" alt="E-Mail" width="20" height="20" />
+                        }
+                        else if (contact.Typ == "6")
+                        {
+                            <img src="icons/Internet.ico" alt="Web" width="20" height="20" />
+                        }
+                        else
+                        {
+                            @contact.Typ
+                        }
+                    </td>
+                    <td>@contact.Kommunikationsadresse</td>
+                    <td>@contact.Gehoert</td>
+                    <td>@contact.Anmerkung</td>
+                    <td>@contact.ImportDatum</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Keine Konatkinfos gefunden.</p>
+}
 
 @code {
-	[Parameter] public List<ContactInfo> ContactInfos { get; set; }
+
+    [Parameter]
+    public List<ContactInfo> ContactInfos { get; set; }
 }

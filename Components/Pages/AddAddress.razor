@@ -11,7 +11,12 @@
     <ValidationSummary />
 
     <div class="form-group">
-        <label for="Aktenzeichen">Aktenzeichen</label>
+        <label for="FileId ">FileId*</label>
+        <InputNumber id="FileId" class="form-control" @bind-Value="address.FileID" />
+    </div>
+    
+    <div class="form-group">
+        <label for="Aktenzeichen">Aktenzeichen*</label>
         <InputText id="Aktenzeichen" class="form-control" @bind-Value="address.Aktenzeichen" />
     </div>
     <div class="form-group">
@@ -27,11 +32,11 @@
         <InputText id="Titel" class="form-control" @bind-Value="address.Titel" />
     </div>
     <div class="form-group">
-        <label for="Vorname">Vorname</label>
+        <label for="Vorname">Vorname*</label>
         <InputText id="Vorname" class="form-control" @bind-Value="address.Vorname" />
     </div>
     <div class="form-group">
-        <label for="Nachname">Nachname</label>
+        <label for="Nachname">Nachname*</label>
         <InputText id="Nachname" class="form-control" @bind-Value="address.Nachname" />
     </div>
     <div class="form-group">
@@ -63,15 +68,17 @@
         <InputText id="Datenquelle" class="form-control" @bind-Value="address.Datenquelle" />
     </div>    
     <div class="form-group">
-        <label for="AddressStatus">Address Status</label>
+        <label for="AddressStatus">Address Status*</label>
         <InputText id="AddressStatus" class="form-control" @bind-Value="address.AddressStatus" />
     </div>
     <div class="form-group">
-        <label for="AktuelleAnschrift">Aktuelle Anschrift?</label>
         <InputCheckbox id="AktuelleAnschrift" class="form-check-input" @bind-Value="address.AktuelleAnschrift" />
+        <label for="AktuelleAnschrift">Aktuelle Anschrift?*</label>
     </div>
     <button type="submit" class="btn btn-primary">Save Address</button>
 </EditForm>
+
+<p>*Pflichtfeld</p>
 
 @if (successMessage != null)
 {
@@ -90,7 +97,6 @@
         {
             // Add the new address to the database
             await AddressService.SaveAddress(address);
-            LogAddress(address);
 
             successMessage = "Address has been successfully added.";
 
@@ -103,22 +109,4 @@
         }
     }
 
-    private void LogAddress(Address address)
-    {
-        Console.WriteLine("Address Created:");
-        Console.WriteLine($"Aktenzeichen: {address.Aktenzeichen}");
-        Console.WriteLine($"Anrede: {address.Anrede}");
-        Console.WriteLine($"Titel: {address.Titel}");
-        Console.WriteLine($"Vorname: {address.Vorname}");
-        Console.WriteLine($"Nachname: {address.Nachname}");
-        Console.WriteLine($"Straße: {address.Straße}");
-        Console.WriteLine($"Hausnummer: {address.Hausnummer}");
-        Console.WriteLine($"PLZ: {address.PLZ}");
-        Console.WriteLine($"Ort: {address.Ort}");
-        Console.WriteLine($"Land: {address.Land}");
-        Console.WriteLine($"Import: {address.Import}");
-        Console.WriteLine($"Datenquelle: {address.Datenquelle}");
-        Console.WriteLine($"Aktuelle Anschrift: {address.AktuelleAnschrift}");
-        Console.WriteLine($"Address Status: {address.AddressStatus}");
-    }
 }
