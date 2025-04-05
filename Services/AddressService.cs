@@ -1,5 +1,6 @@
 ﻿
 using AddressList.Models;
+using static System.Net.WebRequestMethods;
 
 namespace AddressList.Services
 {
@@ -15,6 +16,11 @@ namespace AddressList.Services
         public async Task<List<Address>> GetAddressesAsync()
         {
             return await _http.GetFromJsonAsync<List<Address>>("api/address") ?? new List<Address>();
+        }
+
+        public async Task<List<Address>> SearchAddressAsync(string aktenzeichen)
+        {
+            return await _http.GetFromJsonAsync<List<Address>>($"api/address/search?aktenzeichen={aktenzeichen}") ?? new List<Address>();
         }
 
         public async Task SaveAddress(Address address)
@@ -36,6 +42,12 @@ namespace AddressList.Services
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public async Task ClearAddressData()
+        {
+            var response = await _http.PostAsync("api/address/clear", null);
+            Console.WriteLine(response.IsSuccessStatusCode ? "Data cleared" : "Failed to clear the Address data");
         }
     }
 }

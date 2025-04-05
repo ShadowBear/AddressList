@@ -14,5 +14,10 @@ namespace AddressList.Services
         {
             return await _http.GetFromJsonAsync<List<ContactInfo>>("api/contactinfo") ?? new List<ContactInfo>();
         }
+
+        public async Task<List<ContactInfo>> GetContactInfosByFileId(int fileId)
+        {
+            return await _http.GetFromJsonAsync<List<ContactInfo>>($"api/contactinfo/byfileid?fileId={fileId}") ?? new List<ContactInfo>();
+        }
     }
 }

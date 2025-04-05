@@ -41,14 +41,29 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 
 	protected override async Task OnInitializedAsync()
 	{
-		allAddreses = await AddressService.GetAddressesAsync();
-		allContactInfos = await ContactInfoService.GetContactInfosAsync();
+		//Load data from small DB and use cache
+		//allAddreses = await AddressService.GetAddressesAsync();
+		//allContactInfos = await ContactInfoService.GetContactInfosAsync();
 	}
 
 
-	void SearchResults(){
+	async Task SearchResults(){
 		int fileId = 0;
 		if (string.IsNullOrEmpty(searchInput)) return;
+
+		List<Address> addressResults = await AddressService.SearchAddressAsync(searchInput);
+		addresses = addressResults;
+
+		if(addressResults.Any()){
+			fileId = addressResults.First().FileID;
+			List<ContactInfo> contactInfoResults = await ContactInfoService.GetContactInfosByFileId(fileId);
+			contactInfos = contactInfoResults;
+		}
+
+		//Force re-render because await isn´t always catched and auto re-renders the updated data
+		StateHasChanged();
+
+		/* Small DB using local cache
 		List<Address> searchResults = allAddreses.FindAll(item => item.Aktenzeichen == searchInput);
 		if(searchResults.Count > 0){
 			fileId = searchResults.ElementAt(0).FileID;
@@ -58,6 +73,7 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 
 		List<ContactInfo> searchResultContacts = allContactInfos.FindAll(item => item.FileID == fileId);
 		contactInfos = searchResultContacts;
+		*/
 
 		Console.WriteLine("Searched");
 	}
@@ -71,9 +87,10 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 	}
 
 	async Task ClearAddressData(){
-		var response = await Http.PostAsync("https://localhost:7018/api/address/clear", null);
-		Console.WriteLine(response.IsSuccessStatusCode ? "Data cleared" : "Failed to clear the Address data");
+		await AddressService.ClearAddressData();
 	}
+
+	/******************** Data Upload Logic *********************/
 
 	async Task UploadCSV(){
 		if (selectedFile != null)
