@@ -1,4 +1,5 @@
-﻿@using global::AddressList.Models
+﻿@using global::AddressList.Shared.Models
+@using global::AddressList.Shared.Services
 @using global::AddressList.Services
 @using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient Http
@@ -36,7 +37,7 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 
 	private bool isAddressCSV = true;
 
-	private IBrowserFile selectedFile;	
+	private IBrowserFile selectedFile;
 
 
 	protected override async Task OnInitializedAsync()
@@ -51,12 +52,12 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 		int fileId = 0;
 		if (string.IsNullOrEmpty(searchInput)) return;
 
-		List<Address> addressResults = await AddressService.SearchAddressAsync(searchInput);
+		List<Address> addressResults = await AddressService.SearchAddressesAsync(searchInput);
 		addresses = addressResults;
 
 		if(addressResults.Any()){
 			fileId = addressResults.First().FileID;
-			List<ContactInfo> contactInfoResults = await ContactInfoService.GetContactInfosByFileId(fileId);
+			List<ContactInfo> contactInfoResults = await ContactInfoService.GetContactInfosByFileIdAsync(fileId);
 			contactInfos = contactInfoResults;
 		}
 

@@ -1,5 +1,6 @@
 using AddressList.Components;
 using AddressList.Services;
+using AddressList.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

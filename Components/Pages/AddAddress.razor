@@ -1,4 +1,5 @@
-﻿@using global::AddressList.Models
+﻿@using global::AddressList.Shared.Models
+@using global::AddressList.Shared.Services
 @using global::AddressList.Services
 
 
@@ -89,16 +90,16 @@
 
 @code {
     private Address address = new Address();
-    private string successMessage;
+    private string successMessage ="";
 
     private async Task HandleSubmit()
     {
         try
         {
             // Add the new address to the database
-            await AddressService.SaveAddress(address);
+            bool success = await AddressService.SaveAddress(address);
 
-            successMessage = "Address has been successfully added.";
+            if(success) successMessage = "Address has been successfully added.";
 
             // Reset the form
             address = new Address();
