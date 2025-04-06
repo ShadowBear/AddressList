@@ -1,4 +1,5 @@
-﻿@using global::AddressList.Models
+﻿@using global::AddressList.Shared.Models
+@using global::AddressList.Shared.Services
 @using global::AddressList.Services
 @using Microsoft.AspNetCore.Components.Forms
 @inject HttpClient Http
@@ -6,24 +7,25 @@
 @inject IAddressService AddressService
 @inject IContactInfoService ContactInfoService
 
-@page "/searchField"
+@page "/"
 @rendermode InteractiveServer
 
-<h3>SearchField</h3>
+<h2 class="margin-top">Aktenzeichen:</h2>
 <input @bind="searchInput" />
-<button class="btn btn-primary" @onclick="SearchResults">Suchen</button>
+<button class="btn btn-primary margin-bttm" @onclick="SearchResults">Suchen</button>
 
-<AddressList Addresses="addresses" ContactInfos="contactInfos" />
 
-<InputFile class="btn" OnChange="HandleFileSelection" />
+<AddressList Addresses="addresses" />
+<ContactList ContactInfos="contactInfos" />
+<InputFile class="btn" OnChange="HandleFileSelection" id="fileInput" />
 <input type="radio" checked="@(isAddressCSV == true)"
 name="CSV" @onchange="@(() => isAddressCSV = true)" />
 <label>AddressCSV</label>
 <input type="radio" checked="@(isAddressCSV == false)"
 name="CSV" @onchange="@(() => isAddressCSV = false)" />
 <label>ContactInfoCSV</label>
-<button class="btn btn-secondary" @onclick="UploadCSV">Upload CSV Data</button>
-<button class="btn btn-danger" @onclick="ClearAddressData">Clear Address</button>
+<button class="btn btn-secondary" @onclick="UploadCSV">Upload CSV Daten</button>
+<button class="btn btn-danger" @onclick="ClearAddressData">Adressen löschen</button>
 
 @code {
 	private string searchInput = "";
@@ -35,19 +37,34 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 
 	private bool isAddressCSV = true;
 
-	private IBrowserFile selectedFile;	
+	private IBrowserFile selectedFile;
 
 
 	protected override async Task OnInitializedAsync()
 	{
-		allAddreses = await AddressService.GetAddressesAsync();
-		allContactInfos = await ContactInfoService.GetContactInfosAsync();
+		//Load data from small DB and use cache
+		//allAddreses = await AddressService.GetAddressesAsync();
+		//allContactInfos = await ContactInfoService.GetContactInfosAsync();
 	}
 
 
-	void SearchResults(){
+	async Task SearchResults(){
 		int fileId = 0;
 		if (string.IsNullOrEmpty(searchInput)) return;
+
+		List<Address> addressResults = await AddressService.SearchAddressesAsync(searchInput);
+		addresses = addressResults;
+
+		if(addressResults.Any()){
+			fileId = addressResults.First().FileID;
+			List<ContactInfo> contactInfoResults = await ContactInfoService.GetContactInfosByFileIdAsync(fileId);
+			contactInfos = contactInfoResults;
+		}
+
+		//Force re-render because await isn´t always catched and auto re-renders the updated data
+		StateHasChanged();
+
+		/* Small DB using local cache
 		List<Address> searchResults = allAddreses.FindAll(item => item.Aktenzeichen == searchInput);
 		if(searchResults.Count > 0){
 			fileId = searchResults.ElementAt(0).FileID;
@@ -57,6 +74,7 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 
 		List<ContactInfo> searchResultContacts = allContactInfos.FindAll(item => item.FileID == fileId);
 		contactInfos = searchResultContacts;
+		*/
 
 		Console.WriteLine("Searched");
 	}
@@ -70,9 +88,10 @@ name="CSV" @onchange="@(() => isAddressCSV = false)" />
 	}
 
 	async Task ClearAddressData(){
-		var response = await Http.PostAsync("https://localhost:7018/api/address/clear", null);
-		Console.WriteLine(response.IsSuccessStatusCode ? "Data cleared" : "Failed to clear the Address data");
+		await AddressService.ClearAddressData();
 	}
+
+	/******************** Data Upload Logic *********************/
 
 	async Task UploadCSV(){
 		if (selectedFile != null)

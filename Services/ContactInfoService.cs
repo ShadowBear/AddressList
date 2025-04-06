@@ -1,4 +1,5 @@
-﻿using AddressList.Models;
+﻿using AddressList.Shared.Models;
+using AddressList.Shared.Services;
 
 namespace AddressList.Services
 {
@@ -13,6 +14,11 @@ namespace AddressList.Services
         public async Task<List<ContactInfo>> GetContactInfosAsync()
         {
             return await _http.GetFromJsonAsync<List<ContactInfo>>("api/contactinfo") ?? new List<ContactInfo>();
+        }
+
+        public async Task<List<ContactInfo>> GetContactInfosByFileIdAsync(int fileId)
+        {
+            return await _http.GetFromJsonAsync<List<ContactInfo>>($"api/contactinfo/byfileid?fileId={fileId}") ?? new List<ContactInfo>();
         }
     }
 }
